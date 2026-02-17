@@ -1,0 +1,16 @@
+# Entorno virtual
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Variables de entorno (CRITICO)
+.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Carpetas de VS Code o editores
+.vscode/
+.idea/
