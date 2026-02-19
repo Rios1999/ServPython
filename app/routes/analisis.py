@@ -5,7 +5,7 @@ router = APIRouter(prefix="/analisis", tags=["Progreso"])
 
 @router.get("/ver_records")
 def obtener_records(user_id: str):
-    # 1. Traemos todo el histórico del usuario
+    # 1. Traemos todo el histórico del usuario (incluyendo el id)
     response = supabase.table("Rendimiento") \
         .select('Ejercicio, "Peso (kg)", Repeticiones, RPE, Fecha, RM, Musculo') \
         .eq("user_id", user_id) \
@@ -29,8 +29,11 @@ def obtener_records(user_id: str):
 
     # 3. Formateamos para que el Frontend lo lea fácil
     resultado_final = []
+    id_secuencial = 1
+    
     for nombre_ejercicio, rpes in records_map.items():
         resultado_final.append({
+            "id": id_secuencial,  # ID secuencial: 1, 2, 3, 4...
             "ejercicio": nombre_ejercicio,
             "records_por_rpe": sorted(
                 [datos for rpe, datos in rpes.items()],
@@ -38,6 +41,7 @@ def obtener_records(user_id: str):
                 reverse=True
             )
         })
+        id_secuencial += 1
 
     return {
         "status": "success",

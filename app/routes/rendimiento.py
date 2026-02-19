@@ -7,13 +7,27 @@ router = APIRouter(prefix="/rendimiento", tags=["Rendimiento"])
 
 @router.post("/")
 def guardar_Marca(log: RegistroEntrenamiento):
-    # Ya no necesitas try/except, el Global Handler de main.py captura errores de DB
     data = json.loads(log.model_dump_json(by_alias=True, exclude_none=True))
     
-    # Si esto falla, el Middleware responde automáticamente con el error de Supabase
     supabase.table("Rendimiento").insert(data).execute()
     
-    return {"status": "success"}
+    # Formatear el registro insertado en el formato que necesita el frontend
+    record_formateado = {
+        "Ejercicio": data.get("Ejercicio"),
+        "Fecha": str(data.get("Fecha")),
+        "Musculo": data.get("Musculo"),
+        "Peso (kg)": data.get("Peso (kg)"),
+        "RM": data.get("RM"),
+        "RPE": data.get("RPE"),
+        "Repeticiones": data.get("Repeticiones")
+    }
+    
+    return {
+        "ejercicio": data.get("Ejercicio"),
+        "records_por_rpe": [record_formateado]
+    }
+
+
 
 @router.get("/catalogo-ejercicios/")
 def obtener_catalogo(page: int = 1):
