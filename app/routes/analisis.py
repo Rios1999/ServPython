@@ -5,14 +5,14 @@ router = APIRouter(prefix="/analisis", tags=["Progreso"])
 
 @router.get("/ver_records")
 def obtener_records(user_id: str):
-    # 1. Traemos todo el histórico del usuario (incluyendo el id)
+    # 1. Traemos todo el histórico
     response = supabase.table("Rendimiento") \
         .select('Ejercicio, "Peso (kg)", Repeticiones, RPE, Fecha, RM, Musculo') \
         .eq("user_id", user_id) \
         .execute()
 
-    # 2. Estructura: { "Sentadilla": { 10: registro, 9: registro }, "Banca": {...} }
     records_map = {}
+    id_global = 1  # Contador para los IDs de cada marca individual
 
     for reg in response.data:
         ejercicio = reg["Ejercicio"]
@@ -22,18 +22,20 @@ def obtener_records(user_id: str):
         if ejercicio not in records_map:
             records_map[ejercicio] = {}
 
-        # Si para ese ejercicio y ese RPE específico no hay registro, 
-        # o el RM actual es mejor que el que teníamos guardado:
+        # Verificamos si es un nuevo récord para ese RPE
         if rpe not in records_map[ejercicio] or rm_actual > records_map[ejercicio][rpe]["RM"]:
+            # Insertamos el ID dentro del objeto de la marca
+            reg["id"] = id_global 
             records_map[ejercicio][rpe] = reg
+            id_global += 1 # Incrementamos para la siguiente marca
 
-    # 3. Formateamos para que el Frontend lo lea fácil
+    # 3. Formateamos para el Frontend
     resultado_final = []
-    id_secuencial = 1
     
+    # Aquí ya no necesitamos id_secuencial para el grupo, 
+    # pero lo dejamos si quieres que el grupo también tenga uno.
     for nombre_ejercicio, rpes in records_map.items():
         resultado_final.append({
-            "id": id_secuencial,  # ID secuencial: 1, 2, 3, 4...
             "ejercicio": nombre_ejercicio,
             "records_por_rpe": sorted(
                 [datos for rpe, datos in rpes.items()],
@@ -41,7 +43,6 @@ def obtener_records(user_id: str):
                 reverse=True
             )
         })
-        id_secuencial += 1
 
     return {
         "status": "success",
