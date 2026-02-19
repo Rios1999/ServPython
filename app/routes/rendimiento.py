@@ -23,7 +23,7 @@ def obtener_catalogo(page: int = 1):
     end = start + limit_por_grupo - 1
 
     response = supabase.table("Ejercicios") \
-        .select("nombre, categoria") \
+        .select("nombre, categoria, peso_corporal") \
         .order("categoria", desc=False) \
         .order("nombre", desc=False) \
         .execute()
@@ -51,3 +51,40 @@ def obtener_catalogo(page: int = 1):
         },
         "data": lista_plana_final
     }
+
+
+    try:
+        # 1. Traemos todo el historial ordenado por fecha (el más reciente primero)
+        response = supabase.table("Rendimiento") \
+            .select('*') \
+            .eq("user_id", user_id) \
+            .order("Fecha", desc=True) \
+            .execute()
+
+        if not response.data:
+            return {"status": "success", "data": []}
+
+        # 2. Agrupamos registros por ejercicio
+        agrupados = {}
+        for reg in response.data:
+            ejercicio = reg["Ejercicio"]
+            if ejercicio not in agrupados:
+                agrupados[ejercicio] = []
+            agrupados[ejercicio].append(reg)
+
+        # 3. Aplicamos el filtro: mínimo 2, máximo 3
+        resultado_final = []
+        for ejercicio, registros in agrupados.items():
+            # Solo si tiene 2 o más registros
+            if len(registros) >= 2:
+                # Nos quedamos solo con los 3 primeros (los más recientes)
+                resultado_final.extend(registros[:3])
+
+        return {
+            "status": "success",
+            "count": len(resultado_final),
+            "data": resultado_final
+        }
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
