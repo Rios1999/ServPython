@@ -23,8 +23,11 @@ def guardar_Marca(log: RegistroEntrenamiento):
     }
     
     return {
-        "ejercicio": data.get("Ejercicio"),
-        "records_por_rpe": [record_formateado]
+        "status":"success",
+        "data":{
+            "ejercicio": data.get("Ejercicio"),
+            "records_por_rpe": [record_formateado]
+        }
     }
 
 
