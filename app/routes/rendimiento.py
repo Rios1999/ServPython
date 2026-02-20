@@ -1,11 +1,11 @@
 import json
 from fastapi import APIRouter
 from app.database import supabase
-from app.models.esquemas import RegistroEntrenamiento
+from app.models.esquemas import RegistroEntrenamiento,DeleteRecord
 
 router = APIRouter(prefix="/rendimiento", tags=["Rendimiento"])
 
-@router.post("/")
+@router.post("/guardar_marca")
 def guardar_Marca(log: RegistroEntrenamiento):
     data = json.loads(log.model_dump_json(by_alias=True, exclude_none=True))
     
@@ -27,6 +27,20 @@ def guardar_Marca(log: RegistroEntrenamiento):
         "records_por_rpe": [record_formateado]
     }
 
+
+@router.post("/borrar_marca")
+def eliminar_marca(data: DeleteRecord):
+    response = supabase.table("Rendimiento") \
+        .delete() \
+        .eq("id", data.id) \
+        .execute()
+
+    if len(response.data) == 0:
+        return {"status": "error"}
+
+    return {
+        "status": "success", 
+    }
 
 
 @router.get("/catalogo-ejercicios/")

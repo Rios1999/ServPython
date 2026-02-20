@@ -27,3 +27,7 @@ class RegistroEntrenamiento(BaseModel):
         populate_by_name=True,  # Permite usar peso_kg en el JSON de Vite
         arbitrary_types_allowed=True
     )
+
+
+class DeleteRecord(BaseModel):
+    id: int

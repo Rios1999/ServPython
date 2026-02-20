@@ -82,7 +82,7 @@ def historial_ejercicio_rpe(user_id: str, ejercicio: str, rpe_target: float,page
 
     # 1. Consultamos con filtros y rango de paginación
     response = supabase.table("Rendimiento") \
-        .select('Fecha, "Peso (kg)", Repeticiones, RM', count="exact") \
+        .select('id , Fecha, "Peso (kg)", Repeticiones, RM', count="exact") \
         .eq("user_id", user_id) \
         .eq("Ejercicio", ejercicio) \
         .eq("RPE", rpe_target) \
@@ -105,7 +105,6 @@ def historial_ejercicio_rpe(user_id: str, ejercicio: str, rpe_target: float,page
         
 
 @router.get("/progreso")
-@router.get("/obtener_progreso")
 def obtener_progreso(user_id: str):
     response = supabase.table("Rendimiento") \
         .select('*') \
